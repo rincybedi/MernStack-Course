@@ -1,0 +1,14 @@
+{
+  "emmet.preferences": {
+    "folders": [],
+    "settings": {
+      "emmet.includeLanguages": {
+        "javascript": "javascriptreact"
+      }
+    }
+},
+"emmet.includeLanguages": {
+    "vue-html": "html",
+    "javascript": "javascriptreact"
+}
+}
