@@ -5,8 +5,8 @@ const requireLogin = require("../middleware/requireLogin");
 const Post = mongoose.model("Post");
 
 router.post("/createpost", requireLogin, (req, res) => {
-  const { title, body } = req.body;
-  if (!title || !body) {
+  const { title, body, pic } = req.body;
+  if (!title || !body || !pic) {
     return res.status(422).json({ error: "Please add all the fields" });
   }
   req.user.password = undefined;
@@ -14,6 +14,7 @@ router.post("/createpost", requireLogin, (req, res) => {
     title,
     body,
     postedBy: req.user,
+    photo: pic,
   });
 
   postModel
@@ -28,7 +29,22 @@ router.post("/createpost", requireLogin, (req, res) => {
 
 router.get("/allposts", requireLogin, (req, res) => {
   Post.find()
+    .populate("postedBy", "_id name pic")
+    .populate("comments.postedBy", "_id name")
+
+    .then((posts) => {
+      res.json({ posts: posts });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
+router.get("/getsubposts", requireLogin, (req, res) => {
+  Post.find({ postedBy: { $in: req.user.following } })
     .populate("postedBy", "_id name")
+    .populate("comments.postedBy", "_id name")
+
     .then((posts) => {
       res.json({ posts: posts });
     })
@@ -38,11 +54,9 @@ router.get("/allposts", requireLogin, (req, res) => {
 });
 
 router.get("/myposts", requireLogin, (req, res) => {
-  console.log(req.user._id);
   Post.find({ postedBy: req.user._id })
     .populate("postedBy")
     .then((posts) => {
-      console.log(posts);
       res.json({
         myposts: posts,
       });
@@ -51,6 +65,91 @@ router.get("/myposts", requireLogin, (req, res) => {
       console.log(err);
     });
 });
+
+router.put("/like", requireLogin, (req, res) => {
+  Post.findByIdAndUpdate(
+    req.body.postId,
+    { $push: { likes: req.user._id } },
+    { new: true }
+  ).exec((err, result) => {
+    if (err) {
+      return res.status(422).json({ error: err });
+    }
+    return res.json(result);
+  });
+});
+
+router.put("/unlike", requireLogin, (req, res) => {
+  Post.findByIdAndUpdate(
+    req.body.postId,
+    { $pull: { likes: req.user._id } },
+    { new: true }
+  ).exec((err, result) => {
+    if (err) {
+      return res.status(422).json({ error: err });
+    }
+    return res.json(result);
+  });
+});
+
+router.put("/comment", requireLogin, (req, res) => {
+  const comment = {
+    text: req.body.text,
+    postedBy: req.user._id,
+  };
+  Post.findByIdAndUpdate(
+    req.body.postId,
+    { $push: { comments: comment } },
+    { new: true }
+  )
+    .populate("comments.postedBy", "_id name")
+    .populate("postedBy", "_id name")
+    .exec((err, result) => {
+      if (err) {
+        return res.status(422).json({ error: err });
+      }
+      return res.json(result);
+    });
+});
+
+router.delete("/deletepost/:postId", requireLogin, (req, res) => {
+  Post.findOne({ _id: req.params.postId })
+    .populate("postedBy", "_id")
+    .exec((err, post) => {
+      if (err || !post) {
+        return res.status(422).json({ error: err });
+      }
+      if (post.postedBy._id.toString() === req.user._id.toString()) {
+        post
+          .remove()
+          .then((result) => {
+            res.json(result);
+          })
+          .catch((err) => {
+            res.json({ error: err });
+          });
+      }
+    });
+});
+
+router.put("/deletecomment", requireLogin, (req, res) => {
+  Post.findByIdAndUpdate(
+    req.body.postId,
+    {
+      $pull: {
+        comments: { _id: req.body.commentId },
+      },
+    },
+    { new: true }
+  )
+    .populate("comments.postedBy", "_id name")
+    .populate("postedBy", "_id name")
+    .exec((err, post) => {
+      if (err) {
+        return res.status(422).json({ error: err });
+      }
+      return res.json(post);
+    });
+});
+
 module.exports = router;
-
-

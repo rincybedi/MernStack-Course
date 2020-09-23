@@ -1,11 +1,9 @@
 const express = require("express");
 const app = express();
-const cors = require("cors");
 const PORT = 5000;
 const mongoose = require("mongoose");
 const { MONGOURI } = require("./keys");
 
-app.use(cors);
 // Mongoose Connection
 mongoose.connect(MONGOURI, {
   useNewUrlParser: true,
@@ -29,6 +27,7 @@ mongoose.model("Post");
 app.use(express.json());
 app.use(require("./routes/auth"));
 app.use(require("./routes/post"));
+app.use(require("./routes/user"));
 
 app.listen(PORT, () => {
   console.log("Running at", PORT);

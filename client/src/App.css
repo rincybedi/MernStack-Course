@@ -26,10 +26,51 @@ h2 {
   flex-wrap: wrap;
   justify-content: space-around;
 }
+.gallery img {
+  margin: 10px;
+  height: 200px;
+  width: 200px;
+}
 .home {
 }
 .home-card {
   margin: 25px auto;
   max-width: 500px;
   height: max-content;
+}
+
+#toast-container {
+  top: 30px !important;
+  right: 20px !important;
+  left: auto !important;
+}
+
+.preloader-wrapper {
+  left: 50%;
+  position: fixed;
+  top: 50%;
+  z-index: 99999;
+  display: none;
+}
+
+.material-icons {
+  cursor: pointer !important;
+}
+
+.each-post-postedBy {
+  padding: 5px;
+  position: absolute;
+  line-height: -23px;
+  top: 8px;
+}
+
+.card .material-icons {
+  line-height: 30px;
+}
+
+.user-img {
+  height: 50px;
+  width: 50px;
+  margin: 5px;
+  border-radius: 50%;
 }

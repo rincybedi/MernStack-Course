@@ -3,7 +3,7 @@ import { UserContext } from "../../App";
 import { ProgressBar } from "./ProgressBar";
 import { Link } from "react-router-dom";
 
-const Home = () => {
+const MyFollowingPost = () => {
   const [data, setData] = useState([]);
   const { state, dispatch } = useContext(UserContext);
 
@@ -129,7 +129,7 @@ const Home = () => {
   };
 
   useEffect(() => {
-    fetch("/allposts", {
+    fetch("/getsubposts", {
       headers: {
         Authorization: "Bearer " + localStorage.getItem("jwt"),
       },
@@ -157,7 +157,6 @@ const Home = () => {
               </i>
             )}
             <h5>
-              <img className="user-img" src={item.postedBy.pic}></img>
               <Link
                 className="each-post-postedBy"
                 to={
@@ -237,4 +236,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default MyFollowingPost;
