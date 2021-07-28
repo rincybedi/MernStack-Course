@@ -23,7 +23,7 @@ const Home = () => {
         // console.log(data);
         const newData = data.map((item) => {
           if (item._id == result._id) {
-            console.log(result);
+            // console.log(result);
             return result;
           } else {
             return item;
@@ -140,6 +140,7 @@ const Home = () => {
         setData(result.posts);
       });
   }, []);
+  
   return (
     <div className="home=">
       {data.map((item) => {

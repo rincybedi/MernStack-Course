@@ -3,7 +3,6 @@ import NavBar from "./components/Navbar";
 import "./App.css";
 import {
   BrowserRouter,
-  Router,
   Route,
   Switch,
   useHistory,
@@ -15,6 +14,8 @@ import Profile from "./components/screens/Profile";
 import CreatePost from "./components/screens/CreatePost";
 import UserProfile from "./components/screens/UserProfile";
 import SubUserPost from "./components/screens/SubUserPost";
+import Reset from "./components/screens/Reset";
+import NewPassword from "./components/screens/NewPassword";
 import { reducer, initialState } from "./reducers/userReducer";
 
 export const UserContext = createContext();
@@ -27,7 +28,9 @@ const Routing = () => {
     if (user) {
       dispatch({ type: "USER", payload: user });
     } else {
-      history.push("/signin");
+      if (!window.location.pathname.startsWith("/reset")) {
+        history.push("/signin");
+      }
     }
   }, []);
   return (
@@ -52,6 +55,12 @@ const Routing = () => {
       </Route>
       <Route path="/myfollowingpost">
         <SubUserPost />
+      </Route>
+      <Route exact path="/Reset">
+        <Reset />
+      </Route>
+      <Route exact path="/reset/:token">
+        <NewPassword />
       </Route>
     </Switch>
   );

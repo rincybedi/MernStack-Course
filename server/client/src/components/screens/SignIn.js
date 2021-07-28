@@ -16,7 +16,7 @@ const SignIn = () => {
       )
     ) {
       M.toast({
-        html: "Please enter a valid email id",
+        html: "Please enter a valid Email Id",
         classes: "#e53935 red darken-1",
       });
       return;
@@ -79,6 +79,9 @@ const SignIn = () => {
         <h5>
           <Link to="signup">Dont have an account ?</Link>
         </h5>
+        <h6>
+          <Link to="reset">Forgot Password</Link>
+        </h6>
       </div>
     </div>
   );

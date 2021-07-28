@@ -1,13 +1,13 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const mongoose = require("mongoose");
-const requireLogin = require("../middleware/requireLogin");
-const Post = mongoose.model("Post");
+const mongoose = require('mongoose');
+const requireLogin = require('../middleware/requireLogin');
+const Post = mongoose.model('Post');
 
-router.post("/createpost", requireLogin, (req, res) => {
+router.post('/createpost', requireLogin, (req, res) => {
   const { title, body, pic } = req.body;
   if (!title || !body || !pic) {
-    return res.status(422).json({ error: "Please add all the fields" });
+    return res.status(422).json({ error: 'Please add all the fields' });
   }
   req.user.password = undefined;
   const postModel = new Post({
@@ -27,11 +27,11 @@ router.post("/createpost", requireLogin, (req, res) => {
     });
 });
 
-router.get("/allposts", requireLogin, (req, res) => {
+router.get('/allposts', requireLogin, (req, res) => {
   Post.find()
-    .populate("postedBy", "_id name pic")
-    .populate("comments.postedBy", "_id name")
-
+    .populate('postedBy', '_id name pic')
+    .populate('comments.postedBy', '_id name')
+    .sort('-createdAt')
     .then((posts) => {
       res.json({ posts: posts });
     })
@@ -40,10 +40,11 @@ router.get("/allposts", requireLogin, (req, res) => {
     });
 });
 
-router.get("/getsubposts", requireLogin, (req, res) => {
+router.get('/getsubposts', requireLogin, (req, res) => {
   Post.find({ postedBy: { $in: req.user.following } })
-    .populate("postedBy", "_id name")
-    .populate("comments.postedBy", "_id name")
+    .populate('postedBy', '_id name')
+    .populate('comments.postedBy', '_id name')
+    .sort('-createdAt')
 
     .then((posts) => {
       res.json({ posts: posts });
@@ -53,9 +54,11 @@ router.get("/getsubposts", requireLogin, (req, res) => {
     });
 });
 
-router.get("/myposts", requireLogin, (req, res) => {
+router.get('/myposts', requireLogin, (req, res) => {
   Post.find({ postedBy: req.user._id })
-    .populate("postedBy")
+    .populate('postedBy')
+    .sort('-createdAt')
+
     .then((posts) => {
       res.json({
         myposts: posts,
@@ -66,7 +69,7 @@ router.get("/myposts", requireLogin, (req, res) => {
     });
 });
 
-router.put("/like", requireLogin, (req, res) => {
+router.put('/like', requireLogin, (req, res) => {
   Post.findByIdAndUpdate(
     req.body.postId,
     { $push: { likes: req.user._id } },
@@ -79,7 +82,7 @@ router.put("/like", requireLogin, (req, res) => {
   });
 });
 
-router.put("/unlike", requireLogin, (req, res) => {
+router.put('/unlike', requireLogin, (req, res) => {
   Post.findByIdAndUpdate(
     req.body.postId,
     { $pull: { likes: req.user._id } },
@@ -92,7 +95,7 @@ router.put("/unlike", requireLogin, (req, res) => {
   });
 });
 
-router.put("/comment", requireLogin, (req, res) => {
+router.put('/comment', requireLogin, (req, res) => {
   const comment = {
     text: req.body.text,
     postedBy: req.user._id,
@@ -102,8 +105,8 @@ router.put("/comment", requireLogin, (req, res) => {
     { $push: { comments: comment } },
     { new: true }
   )
-    .populate("comments.postedBy", "_id name")
-    .populate("postedBy", "_id name")
+    .populate('comments.postedBy', '_id name')
+    .populate('postedBy', '_id name')
     .exec((err, result) => {
       if (err) {
         return res.status(422).json({ error: err });
@@ -112,9 +115,9 @@ router.put("/comment", requireLogin, (req, res) => {
     });
 });
 
-router.delete("/deletepost/:postId", requireLogin, (req, res) => {
+router.delete('/deletepost/:postId', requireLogin, (req, res) => {
   Post.findOne({ _id: req.params.postId })
-    .populate("postedBy", "_id")
+    .populate('postedBy', '_id')
     .exec((err, post) => {
       if (err || !post) {
         return res.status(422).json({ error: err });
@@ -132,24 +135,28 @@ router.delete("/deletepost/:postId", requireLogin, (req, res) => {
     });
 });
 
-router.put("/deletecomment", requireLogin, (req, res) => {
-  Post.findByIdAndUpdate(
-    req.body.postId,
-    {
-      $pull: {
-        comments: { _id: req.body.commentId },
-      },
-    },
-    { new: true }
-  )
-    .populate("comments.postedBy", "_id name")
-    .populate("postedBy", "_id name")
-    .exec((err, post) => {
-      if (err) {
-        return res.status(422).json({ error: err });
-      }
-      return res.json(post);
-    });
+router.put('/deletecomment', requireLogin, (req, res) => {
+  try {
+    Post.find({ _id: req.body.postId }),
+      (post) => {
+        console.log(post);
+        var comment = post.comments.filter((c) => c._id == req.body.commentId);
+        console.log('right');
+        var comment_Index = post.comments
+          .map((c) => c_id)
+          .indexOf(req.body.commentId);
+        console.log('right');
+
+        if (comment && comment.length) {
+          post.comments.splice(comment_Index, 1);
+          post.save();
+          console.log('right');
+          return res.json({ post, comment });
+        }
+      };
+  } catch (err) {
+    return res.status(422).json({ error: err });
+  }
 });
 
 module.exports = router;

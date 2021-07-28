@@ -77,7 +77,7 @@ const CreatePost = () => {
     >
       <input
         type="text"
-        placeholder="title"
+        placeholder="Title"
         value={title}
         onChange={(e) => {
           setTitle(e.target.value);
@@ -85,7 +85,7 @@ const CreatePost = () => {
       />
       <input
         type="text"
-        placeholder="body"
+        placeholder="Description"
         value={body}
         onChange={(e) => {
           setBody(e.target.value);

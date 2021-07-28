@@ -103,4 +103,16 @@ router.put("/updatepic", requireLogin, (req, res) => {
   );
 });
 
+router.post("/search-users", requireLogin, (req, res) => {
+  let userPattern = new RegExp("^" + req.body.query);
+  User.find({ email: { $regex: userPattern } })
+    .select("_id email")
+    .then((users) => {
+      res.json({ users });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
 module.exports = router;
